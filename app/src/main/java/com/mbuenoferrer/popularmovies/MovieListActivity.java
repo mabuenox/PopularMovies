@@ -1,14 +1,19 @@
 package com.mbuenoferrer.popularmovies;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mbuenoferrer.popularmovies.adapters.MovieListAdapter;
 import com.mbuenoferrer.popularmovies.data.NetworkMovieRepository;
@@ -18,7 +23,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-public class MovieListActivity extends AppCompatActivity {
+public class MovieListActivity extends AppCompatActivity implements MovieListAdapter.MovieListAdapterOnClickListener {
 
     private RecyclerView mMovieListRecyclerView;
     private MovieListAdapter mMovieListAdapter;
@@ -39,14 +44,14 @@ public class MovieListActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         mMovieListRecyclerView.setLayoutManager(layoutManager);
         mMovieListRecyclerView.setHasFixedSize(true);
-        mMovieListAdapter = new MovieListAdapter();
+        mMovieListAdapter = new MovieListAdapter(this);
         mMovieListRecyclerView.setAdapter(mMovieListAdapter);
 
-        loadMoviesData();
+        loadMoviesData("popular");
     }
 
-    private void loadMoviesData() {
-        new FetchMovieListTask().execute("fake_order");
+    private void loadMoviesData(String order) {
+        new FetchMovieListTask().execute(order);
     }
 
     private void showMoviesDataView() {
@@ -57,6 +62,32 @@ public class MovieListActivity extends AppCompatActivity {
     private void showErrorMessage() {
         mMovieListRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.movie_list_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int selectedId = item.getItemId();
+        if (selectedId == R.id.action_order_popular) {
+            loadMoviesData("popular");
+        } else if (selectedId == R.id.action_order_top_rated) {
+            loadMoviesData("top_rated");
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onMovieClick(Movie movie) {
+        Context context = this;
+        Class destinationClass = MovieDetailsActivity.class;
+        Intent intentToStartDetailActivity = new Intent(context, destinationClass);
+        intentToStartDetailActivity.putExtra(MovieDetailsActivity.MOVIE_ID, movie);
+        startActivity(intentToStartDetailActivity);
     }
 
 
@@ -71,17 +102,32 @@ public class MovieListActivity extends AppCompatActivity {
         @Override
         protected List<Movie> doInBackground(String... params) {
 
+            List<Movie> movieList = null;
+
             if (params.length == 0) {
                 return null;
             }
 
+            String order = params[0];
+
             NetworkMovieRepository repository = new NetworkMovieRepository();
+
             try {
-                return repository.getPopular();
+                switch (order)
+                {
+                    case "popular":
+                        movieList = repository.getPopular();
+                        break;
+                    case "top_rated":
+                        movieList = repository.getTopRated();
+                        break;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
             }
+
+            return movieList;
         }
 
         @Override

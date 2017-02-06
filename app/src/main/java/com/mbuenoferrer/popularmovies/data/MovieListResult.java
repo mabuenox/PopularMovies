@@ -4,6 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class MovieListResult {
 
+    @SerializedName("id")
+    private int id;
+
     @SerializedName("title")
     private String title;
 
@@ -20,11 +23,14 @@ public class MovieListResult {
     private double voteAverage;
 
 
+    public int getId() {
+        return id;
+    }
     public String getTitle() {
         return title;
     }
     public String getPosterPath() {
-        return "http://image.tmdb.org/t/p/w500" + posterPath;
+        return "http://image.tmdb.org/t/p/w185" + posterPath;
     }
     public String getOverview() {
         return overview;

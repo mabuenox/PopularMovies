@@ -20,8 +20,14 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
 
     private List<Movie> mMovieList;
 
-    public MovieListAdapter() {
+    private final MovieListAdapterOnClickListener mOnClickListener;
 
+    public interface MovieListAdapterOnClickListener {
+        void onMovieClick(Movie movie);
+    }
+
+    public MovieListAdapter(MovieListAdapterOnClickListener clickListener) {
+        mOnClickListener = clickListener;
     }
 
     @Override
@@ -54,19 +60,27 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
     }
 
 
-    class MovieViewHolder extends RecyclerView.ViewHolder {
+    class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ImageView posterImageView;
 
         public MovieViewHolder(View itemView) {
             super(itemView);
             posterImageView = (ImageView) itemView.findViewById(R.id.iv_poster);
+            itemView.setOnClickListener(this);
         }
 
         void bind(Movie movie) {
             Picasso.with(posterImageView.getContext())
                     .load(movie.getPoster())
                     .into(posterImageView);
+        }
+
+        @Override
+        public void onClick(View view) {
+            int adapterPosition = getAdapterPosition();
+            Movie movie = mMovieList.get(adapterPosition);
+            mOnClickListener.onMovieClick(movie);
         }
     }
 }

@@ -10,8 +10,7 @@
         android:id="@+id/rv_movies"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:background="#000000"/>
+        android:clipToPadding="false" />
 
     <TextView
         android:id="@+id/tv_error_message_display"

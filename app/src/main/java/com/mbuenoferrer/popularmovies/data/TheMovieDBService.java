@@ -9,4 +9,7 @@ public interface TheMovieDBService {
     @GET("movie/popular")
     Call<MovieListResponse> getPopular(@Query("api_key") String apiKey);
 
+    @GET("movie/top_rated")
+    Call<MovieListResponse> getTopRated(@Query("api_key") String apiKey);
+
 }

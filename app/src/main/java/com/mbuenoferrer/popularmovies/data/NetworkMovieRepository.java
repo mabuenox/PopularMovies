@@ -1,5 +1,7 @@
 package com.mbuenoferrer.popularmovies.data;
 
+import com.mbuenoferrer.popularmovies.BuildConfig;
+import com.mbuenoferrer.popularmovies.R;
 import com.mbuenoferrer.popularmovies.entities.Movie;
 
 import java.io.IOException;
@@ -15,6 +17,8 @@ public class NetworkMovieRepository {
 
     private Retrofit retrofit;
 
+    private String API_KEY = BuildConfig.MOVIE_DB_API_KEY;
+
     public NetworkMovieRepository() {
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://api.themoviedb.org/3/")
@@ -25,35 +29,21 @@ public class NetworkMovieRepository {
     public List<Movie> getPopular() throws IOException {
 
         TheMovieDBService theMovieDBService = retrofit.create(TheMovieDBService.class);
-        Call<MovieListResponse> call = theMovieDBService.getPopular("YOUR_API_KEY"); // todo
+        Call<MovieListResponse> call = theMovieDBService.getPopular(API_KEY);
         Response<MovieListResponse> movieListResponse = call.execute();
         List<MovieListResult> results = movieListResponse.body().getResults();
 
-        // todo: remove this
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            // handle the exception...
-            // For example consider calling Thread.currentThread().interrupt(); here.
-        }
+        return mapResults(results);
+    }
 
+    public List<Movie> getTopRated() throws IOException {
+
+        TheMovieDBService theMovieDBService = retrofit.create(TheMovieDBService.class);
+        Call<MovieListResponse> call = theMovieDBService.getTopRated(API_KEY);
+        Response<MovieListResponse> movieListResponse = call.execute();
+        List<MovieListResult> results = movieListResponse.body().getResults();
 
         return mapResults(results);
-
-        //Asynchronous request
-        /*call.enqueue(new Callback<MovieListResponse>() {
-            @Override
-            public void onResponse(Call<MovieListResponse> call, Response<MovieListResponse> response) {
-
-                //Get our list of articles
-                int result = response.body().getPage();
-            }
-            @Override
-            public void onFailure(Call<MovieListResponse> call, Throwable t){
-                //Handle on Failure here
-            }
-        });*/
     }
 
     private List<Movie> mapResults(List<MovieListResult> results){
@@ -61,7 +51,13 @@ public class NetworkMovieRepository {
 
         for(MovieListResult result : results)
         {
-            Movie movie = new Movie(result.getTitle(), result.getPosterPath());
+            Movie movie = new Movie(result.getId(),
+                    result.getTitle(),
+                    result.getPosterPath(),
+                    result.getOverview(),
+                    result.getReleaseDate(),
+                    result.getVoteAverage());
+
             movies.add(movie);
         }
 
