@@ -7,4 +7,4 @@ This app uses The Movie Database API to retrieve movies. You must provide your o
 
 Just put your API key into ~/.gradle/gradle.properties file:
 
-MovieDBApiToken="WRITE_YOUR_API_KEY_HERE"
+`MovieDBApiToken="WRITE_YOUR_API_KEY_HERE"`
