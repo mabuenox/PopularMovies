@@ -2,25 +2,22 @@ package com.mbuenoferrer.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mbuenoferrer.popularmovies.adapters.MovieListAdapter;
-import com.mbuenoferrer.popularmovies.data.NetworkMovieRepository;
 import com.mbuenoferrer.popularmovies.entities.Movie;
+import com.mbuenoferrer.popularmovies.enums.MovieListSort;
+import com.mbuenoferrer.popularmovies.tasks.FetchMovieListTaskListener;
+import com.mbuenoferrer.popularmovies.tasks.FetchMovieListTask;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 public class MovieListActivity extends AppCompatActivity implements MovieListAdapter.MovieListAdapterOnClickListener {
@@ -40,21 +37,36 @@ public class MovieListActivity extends AppCompatActivity implements MovieListAda
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         // Configure recycler view
-        /*LinearLayoutManager layoutManager = new LinearLayoutManager(this);*/
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         mMovieListRecyclerView.setLayoutManager(layoutManager);
         mMovieListRecyclerView.setHasFixedSize(true);
         mMovieListAdapter = new MovieListAdapter(this);
         mMovieListRecyclerView.setAdapter(mMovieListAdapter);
 
-        loadMoviesData("popular");
+        loadMoviesData(MovieListSort.POPULAR);
     }
 
-    private void loadMoviesData(String order) {
-        new FetchMovieListTask().execute(order);
+    private void loadMoviesData(MovieListSort sortBy) {
+        new FetchMovieListTask(this, new FetchMovieListTaskListener() {
+            @Override
+            public void onTaskPreExecute() {
+                mLoadingIndicator.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onTaskPostExecute(List<Movie> result) {
+                mLoadingIndicator.setVisibility(View.INVISIBLE);
+                if (result != null) {
+                    showMovieList();
+                    mMovieListAdapter.setMoviesData(result);
+                } else {
+                    showErrorMessage();
+                }
+            }
+        }).execute(sortBy);
     }
 
-    private void showMoviesDataView() {
+    private void showMovieList() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mMovieListRecyclerView.setVisibility(View.VISIBLE);
     }
@@ -74,9 +86,9 @@ public class MovieListActivity extends AppCompatActivity implements MovieListAda
     public boolean onOptionsItemSelected(MenuItem item) {
         int selectedId = item.getItemId();
         if (selectedId == R.id.action_order_popular) {
-            loadMoviesData("popular");
+            loadMoviesData(MovieListSort.POPULAR);
         } else if (selectedId == R.id.action_order_top_rated) {
-            loadMoviesData("top_rated");
+            loadMoviesData(MovieListSort.TOP_RATED);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -90,55 +102,4 @@ public class MovieListActivity extends AppCompatActivity implements MovieListAda
         startActivity(intentToStartDetailActivity);
     }
 
-
-    public class FetchMovieListTask extends AsyncTask<String, Void, List<Movie>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<Movie> doInBackground(String... params) {
-
-            List<Movie> movieList = null;
-
-            if (params.length == 0) {
-                return null;
-            }
-
-            String order = params[0];
-
-            NetworkMovieRepository repository = new NetworkMovieRepository();
-
-            try {
-                switch (order)
-                {
-                    case "popular":
-                        movieList = repository.getPopular();
-                        break;
-                    case "top_rated":
-                        movieList = repository.getTopRated();
-                        break;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-
-            return movieList;
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> movieList) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (movieList != null) {
-                showMoviesDataView();
-                mMovieListAdapter.setMoviesData(movieList);
-            } else {
-                showErrorMessage();
-            }
-        }
-    }
 }

@@ -12,7 +12,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         def STRING = "String"
-        buildConfigField STRING, "MOVIE_DB_API_KEY", "\"WRITE_HERE_YOUR_API_KEY\""
+        buildConfigField STRING, "MOVIE_DB_API_KEY", MovieDBApiToken
     }
     buildTypes {
         release {
