@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.mbuenoferrer.popularmovies.adapters.MovieListAdapter;
+import com.mbuenoferrer.popularmovies.viewadapters.MovieListAdapter;
 import com.mbuenoferrer.popularmovies.entities.Movie;
 import com.mbuenoferrer.popularmovies.enums.MovieListSort;
 import com.mbuenoferrer.popularmovies.tasks.FetchMovieListTaskListener;
