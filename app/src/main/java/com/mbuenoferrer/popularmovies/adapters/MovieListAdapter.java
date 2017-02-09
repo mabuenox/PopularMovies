@@ -1,4 +1,4 @@
-package com.mbuenoferrer.popularmovies.viewadapters;
+package com.mbuenoferrer.popularmovies.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
